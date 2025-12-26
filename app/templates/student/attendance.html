@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-container">
+    <h2>Your Attendance</h2>
+    {% if records %}
+    <table>
+        <thead>
+            <tr>
+                <th>Class ID</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in records %}
+            <tr>
+                <td>{{r.class_id}}</td>
+                <td>
+                    {% if r.status %}
+                        <span class="status-present">Present</span>
+                    {% else %}
+                        <span class="status-absent">Absent</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-records">No attendance records yet.</p>
+    {% endif %}
+    <a href="/student" style="display: inline-block; margin-top: 20px;">Back to Dashboard</a>
+</div>
+{% endblock %}

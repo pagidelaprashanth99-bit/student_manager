@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-container">
+    <h2>Mark Attendance</h2>
+    <form method="post">
+        {% for s in students %}
+            <div style="margin: 10px 0;">
+                <input type="checkbox" name="{{s.id}}" id="student_{{s.id}}" style="width: auto; margin-right: 10px;">
+                <label for="student_{{s.id}}" style="display: inline; margin: 0;">{{s.name}}</label>
+            </div>
+        {% endfor %}
+        <button type="submit">Submit Attendance</button>
+        <a href="/teacher" style="margin-left: 10px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h2>Student Dashboard</h2>
+    <p class="current-time">Server Time: {{ current_time }} | Your Local Time: <span id="client-time"></span></p>
+    <script>
+        // Display client's local time
+        function updateClientTime() {
+            var now = new Date();
+            var hours = String(now.getHours()).padStart(2, '0');
+            var minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('client-time').textContent = hours + ':' + minutes;
+        }
+        updateClientTime();
+        setInterval(updateClientTime, 1000); // Update every second
+    </script>
+
+    <div class="class-schedules-section">
+        <h3>📚 Class Schedules</h3>
+        {% if class_schedules %}
+        <div class="class-list">
+            {% for item in class_schedules %}
+            <div class="class-card {% if item.can_mark %}available{% elif item.already_marked %}marked{% else %}upcoming{% endif %}">
+                <div class="class-header">
+                    <strong>{{ item.schedule.class_name }}</strong>
+                    {% if item.already_marked %}
+                        <span class="badge marked-badge">✓ Marked</span>
+                    {% elif item.can_mark %}
+                        <span class="badge available-badge">Mark Now</span>
+                    {% else %}
+                        <span class="badge upcoming-badge">Upcoming</span>
+                    {% endif %}
+                </div>
+                <div class="class-details">
+                    <p><strong>Date:</strong> {{ item.schedule.class_date.strftime('%Y-%m-%d') if item.schedule.class_date else 'N/A' }}</p>
+                    <p><strong>Time:</strong> {{ item.schedule.start_time.strftime('%H:%M') }} - {{ item.schedule.end_time.strftime('%H:%M') }}</p>
+                </div>
+                {% if item.can_mark %}
+                <form method="post" action="/student/mark-attendance" class="mark-form" id="attendance-form-{{ item.schedule.id }}">
+                    <input type="hidden" name="class_schedule_id" value="{{ item.schedule.id }}">
+                    <input type="hidden" name="client_date" id="client-date-{{ item.schedule.id }}">
+                    <input type="hidden" name="client_time" id="client-time-{{ item.schedule.id }}">
+                    <button type="submit" class="btn-mark">Mark Attendance</button>
+                </form>
+                <script>
+                    // Set client date and time when form is submitted
+                    document.getElementById('attendance-form-{{ item.schedule.id }}').addEventListener('submit', function(e) {
+                        var now = new Date();
+                        var year = now.getFullYear();
+                        var month = String(now.getMonth() + 1).padStart(2, '0');
+                        var day = String(now.getDate()).padStart(2, '0');
+                        var hours = String(now.getHours()).padStart(2, '0');
+                        var minutes = String(now.getMinutes()).padStart(2, '0');
+                        
+                        document.getElementById('client-date-{{ item.schedule.id }}').value = year + '-' + month + '-' + day;
+                        document.getElementById('client-time-{{ item.schedule.id }}').value = hours + ':' + minutes;
+                    });
+                </script>
+                {% elif item.already_marked %}
+                <p class="marked-text">You have already marked attendance for this class today.</p>
+                {% elif not item.is_today %}
+                <p class="info-text">This class is not scheduled for today.</p>
+                {% else %}
+                <p class="info-text">Class time: {{ item.schedule.start_time.strftime('%H:%M') }} - {{ item.schedule.end_time.strftime('%H:%M') }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="no-classes">No class schedules available. Ask your teacher to create classes.</p>
+        {% endif %}
+    </div>
+
+    <div class="attendance-section">
+        <h3>Your Attendance Records</h3>
+        {% if records %}
+        <table class="attendance-table">
+            <thead>
+                <tr>
+                    <th>Class Name</th>
+                    <th>Status</th>
+                    <th>Marked At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in records %}
+                <tr>
+                    <td>{{ item.class_name }}</td>
+                    <td>
+                        {% if item.record.status %}
+                            <span class="status-present">✓ Present</span>
+                        {% else %}
+                            <span class="status-absent">✗ Absent</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.record.marked_at %}
+                            {{ item.record.marked_at.strftime('%Y-%m-%d %H:%M') }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="no-records">No attendance records yet.</p>
+        {% endif %}
+
+        <div class="attendance-summary">
+            <h3>Total Attendance: {{ percentage }}%</h3>
+            {% if percentage < 80 %}
+            <p class="warning">⚠ Attendance below 80%</p>
+            {% else %}
+            <p class="success">✅ Attendance OK</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+{% endblock %}
