@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Edit Student</h2>
+
+<a href="{{ url_for('teacher.students') }}">Back</a>
+
+<br><br>
+
+<form method="POST">
+    <label>Student Name</label>
+    <input type="text" name="name" value="{{ student.name }}" required>
+
+    <br><br>
+
+    <label>Username</label>
+    <input type="text" name="username" value="{{ user.username }}" required>
+
+    <br><br>
+
+    <label>New Password</label>
+    <input type="password" name="password" placeholder="Leave empty to keep old password">
+
+    <br><br>
+
+    <button type="submit">Update Student</button>
+</form>
+
+{% endblock %}
