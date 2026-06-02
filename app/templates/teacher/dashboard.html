@@ -4,22 +4,19 @@
 
 <h2>Teacher Dashboard</h2>
 
-<a href="{{ url_for('teacher.create_class') }}">
-    Create Class / Subject
-</a>
-
+<a href="{{ url_for('teacher.students') }}">Manage Students</a>
 <br><br>
 
-<a href="{{ url_for('teacher.analysis') }}">
-    View Attendance Analysis
-</a>
+<a href="{{ url_for('teacher.create_class') }}">Create Class / Subject</a>
+<br><br>
+
+<a href="{{ url_for('teacher.analysis') }}">View Attendance Analysis</a>
 
 <hr>
 
 <h3>Classes</h3>
 
 <table border="1" cellpadding="10">
-
     <tr>
         <th>Subject</th>
         <th>Date</th>
@@ -28,30 +25,17 @@
     </tr>
 
     {% for class in classes %}
-
     <tr>
-
         <td>{{ class.class_name }}</td>
-
         <td>{{ class.class_date }}</td>
-
+        <td>{{ class.start_time }} - {{ class.end_time }}</td>
         <td>
-            {{ class.start_time }} -
-            {{ class.end_time }}
-        </td>
-
-        <td>
-
             <a href="{{ url_for('teacher.take_attendance', class_id=class.id) }}">
                 Mark / Edit Attendance
             </a>
-
         </td>
-
     </tr>
-
     {% endfor %}
-
 </table>
 
 {% endblock %}
