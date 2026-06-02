@@ -1,12 +1,18 @@
 from app import db, login_manager
 from flask_login import UserMixin
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
+
+IST = ZoneInfo("Asia/Kolkata")
+
+def india_now():
+    return datetime.now(IST).replace(tzinfo=None)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(200))
-    role = db.Column(db.String(10))  # teacher / student
+    role = db.Column(db.String(10))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -24,15 +30,28 @@ class ClassSession(db.Model):
 class ClassSchedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     class_name = db.Column(db.String(100))
-    class_date = db.Column(db.Date)  # Specific date for the class
+    class_date = db.Column(db.Date)
     start_time = db.Column(db.Time)
     end_time = db.Column(db.Time)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now())
+    created_at = db.Column(db.DateTime, default=india_now)
+
+class StudentClassAssignment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey("student.id"))
+    class_schedule_id = db.Column(db.Integer, db.ForeignKey("class_schedule.id"))
+    created_at = db.Column(db.DateTime, default=india_now)
 
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer)
-    class_id = db.Column(db.Integer)  # For backward compatibility with ClassSession
-    class_schedule_id = db.Column(db.Integer, db.ForeignKey('class_schedule.id'))  # Link to ClassSchedule
-    status = db.Column(db.Boolean)  # True = Present
-    marked_at = db.Column(db.DateTime, default=lambda: datetime.now())
+    class_id = db.Column(db.Integer)
+    class_schedule_id = db.Column(db.Integer, db.ForeignKey("class_schedule.id"))
+    status = db.Column(db.Boolean)
+    marked_at = db.Column(db.DateTime, default=india_now)
+
+class AttendancePercentageOverride(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey("student.id"))
+    subject_name = db.Column(db.String(100))
+    percentage = db.Column(db.Float)
+    updated_at = db.Column(db.DateTime, default=india_now)
