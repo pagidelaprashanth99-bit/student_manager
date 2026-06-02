@@ -10,17 +10,23 @@ from app.models import (
 )
 from datetime import datetime
 
-teacher = Blueprint("teacher", __name__, url_prefix="/teacher")
+teacher_bp = Blueprint("teacher", __name__, url_prefix="/teacher")
 
 
-@teacher.route("/dashboard")
+@teacher_bp.route("/")
+@login_required
+def teacher_home():
+    return redirect(url_for("teacher.dashboard"))
+
+
+@teacher_bp.route("/dashboard")
 @login_required
 def dashboard():
     classes = ClassSchedule.query.order_by(ClassSchedule.class_date.desc()).all()
     return render_template("teacher/dashboard.html", classes=classes)
 
 
-@teacher.route("/create_class", methods=["GET", "POST"])
+@teacher_bp.route("/create_class", methods=["GET", "POST"])
 @login_required
 def create_class():
     students = Student.query.all()
@@ -42,11 +48,10 @@ def create_class():
         db.session.commit()
 
         for student_id in selected_students:
-            assignment = StudentClassAssignment(
+            db.session.add(StudentClassAssignment(
                 student_id=int(student_id),
-                class_schedule_id=new_class.id,
-            )
-            db.session.add(assignment)
+                class_schedule_id=new_class.id
+            ))
 
         db.session.commit()
         return redirect(url_for("teacher.dashboard"))
@@ -54,73 +59,80 @@ def create_class():
     return render_template("teacher/create_class.html", students=students)
 
 
-@teacher.route("/take_attendance/<int:class_id>", methods=["GET", "POST"])
+@teacher_bp.route("/take_attendance/<int:class_id>", methods=["GET", "POST"])
 @login_required
 def take_attendance(class_id):
     class_schedule = ClassSchedule.query.get_or_404(class_id)
 
-    assignments = StudentClassAssignment.query.filter_by(
-        class_schedule_id=class_id
-    ).all()
-
-    students = []
-    for assignment in assignments:
-        student = Student.query.get(assignment.student_id)
-        if student:
-            students.append(student)
+    assignments = StudentClassAssignment.query.filter_by(class_schedule_id=class_id).all()
+    students = [Student.query.get(a.student_id) for a in assignments if Student.query.get(a.student_id)]
 
     if request.method == "POST":
         for student in students:
             status_value = request.form.get(f"status_{student.id}")
-            is_present = True if status_value == "present" else False
+            is_present = status_value == "present"
 
             attendance = Attendance.query.filter_by(
                 student_id=student.id,
-                class_schedule_id=class_id,
+                class_schedule_id=class_id
             ).first()
 
             if attendance:
                 attendance.status = is_present
             else:
-                attendance = Attendance(
+                db.session.add(Attendance(
                     student_id=student.id,
-                    class_schedule_id=class_id,
                     class_id=class_id,
-                    status=is_present,
-                )
-                db.session.add(attendance)
+                    class_schedule_id=class_id,
+                    status=is_present
+                ))
 
         db.session.commit()
         return redirect(url_for("teacher.dashboard"))
 
-    attendance_map = {}
     records = Attendance.query.filter_by(class_schedule_id=class_id).all()
-    for record in records:
-        attendance_map[record.student_id] = record.status
+    attendance_map = {record.student_id: record.status for record in records}
 
     return render_template(
         "teacher/take_attendance.html",
         class_schedule=class_schedule,
         students=students,
-        attendance_map=attendance_map,
+        attendance_map=attendance_map
     )
 
 
-@teacher.route("/analysis", methods=["GET", "POST"])
+@teacher_bp.route("/analysis", methods=["GET", "POST"])
 @login_required
 def analysis():
-    students = Student.query.all()
+    if request.method == "POST":
+        student_id = int(request.form.get("student_id"))
+        subject_name = request.form.get("subject_name")
+        percentage = float(request.form.get("percentage"))
+
+        override = AttendancePercentageOverride.query.filter_by(
+            student_id=student_id,
+            subject_name=subject_name
+        ).first()
+
+        if override:
+            override.percentage = percentage
+        else:
+            db.session.add(AttendancePercentageOverride(
+                student_id=student_id,
+                subject_name=subject_name,
+                percentage=percentage
+            ))
+
+        db.session.commit()
+        return redirect(url_for("teacher.analysis"))
 
     result = []
 
-    for student in students:
-        assigned_classes = StudentClassAssignment.query.filter_by(
-            student_id=student.id
-        ).all()
-
+    for student in Student.query.all():
+        assignments = StudentClassAssignment.query.filter_by(student_id=student.id).all()
         subjects = {}
 
-        for assignment in assigned_classes:
+        for assignment in assignments:
             class_schedule = ClassSchedule.query.get(assignment.class_schedule_id)
             if not class_schedule:
                 continue
@@ -133,7 +145,7 @@ def analysis():
                     "subject": subject,
                     "attended": 0,
                     "total": 0,
-                    "percentage": 0,
+                    "percentage": 0
                 }
 
             subjects[subject]["total"] += 1
@@ -141,7 +153,7 @@ def analysis():
             attendance = Attendance.query.filter_by(
                 student_id=student.id,
                 class_schedule_id=class_schedule.id,
-                status=True,
+                status=True
             ).first()
 
             if attendance:
@@ -149,41 +161,16 @@ def analysis():
 
         for subject_name, data in subjects.items():
             if data["total"] > 0:
-                data["percentage"] = round(
-                    (data["attended"] / data["total"]) * 100, 2
-                )
+                data["percentage"] = round((data["attended"] / data["total"]) * 100, 2)
 
             override = AttendancePercentageOverride.query.filter_by(
                 student_id=student.id,
-                subject_name=subject_name,
+                subject_name=subject_name
             ).first()
 
             if override:
                 data["percentage"] = override.percentage
 
             result.append(data)
-
-    if request.method == "POST":
-        student_id = int(request.form.get("student_id"))
-        subject_name = request.form.get("subject_name")
-        percentage = float(request.form.get("percentage"))
-
-        override = AttendancePercentageOverride.query.filter_by(
-            student_id=student_id,
-            subject_name=subject_name,
-        ).first()
-
-        if override:
-            override.percentage = percentage
-        else:
-            override = AttendancePercentageOverride(
-                student_id=student_id,
-                subject_name=subject_name,
-                percentage=percentage,
-            )
-            db.session.add(override)
-
-        db.session.commit()
-        return redirect(url_for("teacher.analysis"))
 
     return render_template("teacher/analysis.html", result=result)
