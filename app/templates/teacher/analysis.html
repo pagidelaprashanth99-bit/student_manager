@@ -1,35 +1,62 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="content-container">
-    <h2>Attendance Analysis</h2>
-    {% if report %}
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Percentage</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for name, percent in report %}
-            <tr>
-                <td>{{name}}</td>
-                <td>{{percent}}%</td>
-                <td>
-                    {% if percent < 80 %}
-                        <span class="status-absent">LOW</span>
-                    {% else %}
-                        <span class="status-present">OK</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p class="no-records">No attendance data available.</p>
-    {% endif %}
-    <a href="/teacher" style="display: inline-block; margin-top: 20px;">Back to Dashboard</a>
-</div>
+
+<h2>Attendance Analysis</h2>
+
+<table border="1" cellpadding="10">
+
+    <tr>
+        <th>Student</th>
+        <th>Subject</th>
+        <th>Attended</th>
+        <th>Total</th>
+        <th>Percentage</th>
+        <th>Edit Percentage</th>
+    </tr>
+
+    {% for item in result %}
+    <tr>
+
+        <td>{{ item.student.name }}</td>
+
+        <td>{{ item.subject }}</td>
+
+        <td>{{ item.attended }}</td>
+
+        <td>{{ item.total }}</td>
+
+        <td>{{ item.percentage }}%</td>
+
+        <td>
+
+            <form method="POST">
+
+                <input type="hidden"
+                       name="student_id"
+                       value="{{ item.student.id }}">
+
+                <input type="hidden"
+                       name="subject_name"
+                       value="{{ item.subject }}">
+
+                <input type="number"
+                       step="0.01"
+                       name="percentage"
+                       value="{{ item.percentage }}"
+                       required>
+
+                <button type="submit">
+                    Update
+                </button>
+
+            </form>
+
+        </td>
+
+    </tr>
+    {% endfor %}
+
+</table>
+
 {% endblock %}
