@@ -2,29 +2,54 @@
 
 {% block content %}
 
-<h2>Student Dashboard</h2>
+<h2>Teacher Dashboard</h2>
+
+<a href="{{ url_for('teacher.create_class') }}">
+    Create Class / Subject
+</a>
+
+<br><br>
+
+<a href="{{ url_for('teacher.analysis') }}">
+    View Attendance Analysis
+</a>
+
+<hr>
+
+<h3>Classes</h3>
 
 <table border="1" cellpadding="10">
 
     <tr>
         <th>Subject</th>
-        <th>Attended Classes</th>
-        <th>Total Classes</th>
-        <th>Attendance Percentage</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Attendance</th>
     </tr>
 
-    {% for item in result %}
+    {% for class in classes %}
+
     <tr>
 
-        <td>{{ item.subject }}</td>
+        <td>{{ class.class_name }}</td>
 
-        <td>{{ item.attended }}</td>
+        <td>{{ class.class_date }}</td>
 
-        <td>{{ item.total }}</td>
+        <td>
+            {{ class.start_time }} -
+            {{ class.end_time }}
+        </td>
 
-        <td>{{ item.percentage }}%</td>
+        <td>
+
+            <a href="{{ url_for('teacher.take_attendance', class_id=class.id) }}">
+                Mark / Edit Attendance
+            </a>
+
+        </td>
 
     </tr>
+
     {% endfor %}
 
 </table>
