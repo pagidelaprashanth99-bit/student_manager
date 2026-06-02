@@ -1,14 +1,17 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required
+from werkzeug.security import generate_password_hash
+from datetime import datetime
+
 from app import db
 from app.models import (
+    User,
     Student,
     ClassSchedule,
     StudentClassAssignment,
     Attendance,
     AttendancePercentageOverride,
 )
-from datetime import datetime
 
 teacher_bp = Blueprint("teacher", __name__, url_prefix="/teacher")
 
@@ -24,6 +27,77 @@ def teacher_home():
 def dashboard():
     classes = ClassSchedule.query.order_by(ClassSchedule.class_date.desc()).all()
     return render_template("teacher/dashboard.html", classes=classes)
+
+
+@teacher_bp.route("/students")
+@login_required
+def students():
+    students = Student.query.all()
+    return render_template("teacher/students.html", students=students)
+
+
+@teacher_bp.route("/students/add", methods=["GET", "POST"])
+@login_required
+def add_student():
+    if request.method == "POST":
+        name = request.form.get("name")
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        user = User(
+            username=username,
+            password=generate_password_hash(password),
+            role="student"
+        )
+        db.session.add(user)
+        db.session.commit()
+
+        student = Student(name=name, user_id=user.id)
+        db.session.add(student)
+        db.session.commit()
+
+        return redirect(url_for("teacher.students"))
+
+    return render_template("teacher/add_student.html")
+
+
+@teacher_bp.route("/students/edit/<int:student_id>", methods=["GET", "POST"])
+@login_required
+def edit_student(student_id):
+    student = Student.query.get_or_404(student_id)
+    user = User.query.get(student.user_id)
+
+    if request.method == "POST":
+        student.name = request.form.get("name")
+        user.username = request.form.get("username")
+
+        new_password = request.form.get("password")
+        if new_password:
+            user.password = generate_password_hash(new_password)
+
+        db.session.commit()
+        return redirect(url_for("teacher.students"))
+
+    return render_template("teacher/edit_student.html", student=student, user=user)
+
+
+@teacher_bp.route("/students/delete/<int:student_id>")
+@login_required
+def delete_student(student_id):
+    student = Student.query.get_or_404(student_id)
+    user = User.query.get(student.user_id)
+
+    Attendance.query.filter_by(student_id=student.id).delete()
+    StudentClassAssignment.query.filter_by(student_id=student.id).delete()
+    AttendancePercentageOverride.query.filter_by(student_id=student.id).delete()
+
+    db.session.delete(student)
+
+    if user:
+        db.session.delete(user)
+
+    db.session.commit()
+    return redirect(url_for("teacher.students"))
 
 
 @teacher_bp.route("/create_class", methods=["GET", "POST"])
@@ -48,10 +122,11 @@ def create_class():
         db.session.commit()
 
         for student_id in selected_students:
-            db.session.add(StudentClassAssignment(
+            assignment = StudentClassAssignment(
                 student_id=int(student_id),
                 class_schedule_id=new_class.id
-            ))
+            )
+            db.session.add(assignment)
 
         db.session.commit()
         return redirect(url_for("teacher.dashboard"))
@@ -64,8 +139,15 @@ def create_class():
 def take_attendance(class_id):
     class_schedule = ClassSchedule.query.get_or_404(class_id)
 
-    assignments = StudentClassAssignment.query.filter_by(class_schedule_id=class_id).all()
-    students = [Student.query.get(a.student_id) for a in assignments if Student.query.get(a.student_id)]
+    assignments = StudentClassAssignment.query.filter_by(
+        class_schedule_id=class_id
+    ).all()
+
+    students = []
+    for assignment in assignments:
+        student = Student.query.get(assignment.student_id)
+        if student:
+            students.append(student)
 
     if request.method == "POST":
         for student in students:
@@ -80,12 +162,13 @@ def take_attendance(class_id):
             if attendance:
                 attendance.status = is_present
             else:
-                db.session.add(Attendance(
+                attendance = Attendance(
                     student_id=student.id,
                     class_id=class_id,
                     class_schedule_id=class_id,
                     status=is_present
-                ))
+                )
+                db.session.add(attendance)
 
         db.session.commit()
         return redirect(url_for("teacher.dashboard"))
@@ -117,11 +200,12 @@ def analysis():
         if override:
             override.percentage = percentage
         else:
-            db.session.add(AttendancePercentageOverride(
+            override = AttendancePercentageOverride(
                 student_id=student_id,
                 subject_name=subject_name,
                 percentage=percentage
-            ))
+            )
+            db.session.add(override)
 
         db.session.commit()
         return redirect(url_for("teacher.analysis"))
@@ -129,11 +213,15 @@ def analysis():
     result = []
 
     for student in Student.query.all():
-        assignments = StudentClassAssignment.query.filter_by(student_id=student.id).all()
+        assignments = StudentClassAssignment.query.filter_by(
+            student_id=student.id
+        ).all()
+
         subjects = {}
 
         for assignment in assignments:
             class_schedule = ClassSchedule.query.get(assignment.class_schedule_id)
+
             if not class_schedule:
                 continue
 
@@ -161,7 +249,10 @@ def analysis():
 
         for subject_name, data in subjects.items():
             if data["total"] > 0:
-                data["percentage"] = round((data["attended"] / data["total"]) * 100, 2)
+                data["percentage"] = round(
+                    (data["attended"] / data["total"]) * 100,
+                    2
+                )
 
             override = AttendancePercentageOverride.query.filter_by(
                 student_id=student.id,
