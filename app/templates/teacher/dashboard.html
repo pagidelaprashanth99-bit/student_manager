@@ -1,41 +1,81 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Dashboard</title>
+</head>
+<body>
 
-{% block content %}
+<h1>Teacher Dashboard</h1>
 
-<h2>Teacher Dashboard</h2>
+<br>
 
-<a href="{{ url_for('teacher.students') }}">Manage Students</a>
+<a href="{{ url_for('teacher.subjects') }}">
+    Create Subjects
+</a>
+
 <br><br>
 
-<a href="{{ url_for('teacher.create_class') }}">Create Class / Subject</a>
+<a href="{{ url_for('teacher.add_student') }}">
+    Add Student
+</a>
+
 <br><br>
 
-<a href="{{ url_for('teacher.analysis') }}">View Attendance Analysis</a>
+<a href="{{ url_for('teacher.students') }}">
+    Students List
+</a>
+
+<br><br>
+
+<a href="{{ url_for('teacher.create_class') }}">
+    Create Class
+</a>
+
+<br><br>
+
+<a href="{{ url_for('emergency.emergency_home') }}">
+    Emergency
+</a>
 
 <hr>
 
-<h3>Classes</h3>
+<h2>All Classes</h2>
 
 <table border="1" cellpadding="10">
+
     <tr>
         <th>Subject</th>
         <th>Date</th>
-        <th>Time</th>
+        <th>Start</th>
+        <th>End</th>
         <th>Attendance</th>
     </tr>
 
-    {% for class in classes %}
+    {% for cls in classes %}
+
     <tr>
-        <td>{{ class.class_name }}</td>
-        <td>{{ class.class_date }}</td>
-        <td>{{ class.start_time }} - {{ class.end_time }}</td>
+
+        <td>{{ cls.class_name }}</td>
+
+        <td>{{ cls.class_date }}</td>
+
+        <td>{{ cls.start_time }}</td>
+
+        <td>{{ cls.end_time }}</td>
+
         <td>
-            <a href="{{ url_for('teacher.take_attendance', class_id=class.id) }}">
-                Mark / Edit Attendance
+
+            <a href="{{ url_for('teacher.attendance', class_id=cls.id) }}">
+                Take Attendance
             </a>
+
         </td>
+
     </tr>
+
     {% endfor %}
+
 </table>
 
-{% endblock %}
+</body>
+</html>
