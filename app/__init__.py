@@ -38,6 +38,22 @@ def create_app():
     app.register_blueprint(emergency)
 
     with app.app_context():
+
         db.create_all()
 
+        from app.models import User
+        from werkzeug.security import generate_password_hash
+
+        teacher = User.query.filter_by(username="teacher").first()
+
+        if not teacher:
+
+            teacher = User(
+                username="teacher",
+                password=generate_password_hash("teacher123"),
+                role="teacher"
+            )
+
+            db.session.add(teacher)
+            db.session.commit()
     return app
