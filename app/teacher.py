@@ -30,7 +30,7 @@ def dashboard():
 # =========================
 # CREATE SUBJECT
 # =========================
-@teacher.route("/teacher/subjects", methods=["GET", "POST"])
+@teacher.route("/teacher/subject", methods=["GET", "POST"])
 @login_required
 def subjects():
 
@@ -52,7 +52,7 @@ def subjects():
     all_subjects = Subject.query.all()
 
     return render_template(
-        "teacher/subjects.html",
+        "teacher/subject.html",
         subjects=all_subjects
     )
 
@@ -213,7 +213,7 @@ def create_class():
     subjects = Subject.query.all()
 
     return render_template(
-        "teahcer/create_class.html",
+        "teacher/create_class.html",
         subjects=subjects
     )
 
