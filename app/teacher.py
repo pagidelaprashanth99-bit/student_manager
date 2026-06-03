@@ -23,7 +23,7 @@ def dashboard():
     classes = ClassSchedule.query.order_by(ClassSchedule.class_date.desc()).all()
 
     return render_template(
-        "dashboard.html",
+        "teacher/dashboard.html",
         classes=classes
     )
 
@@ -52,7 +52,7 @@ def subjects():
     all_subjects = Subject.query.all()
 
     return render_template(
-        "subjects.html",
+        "teacher/subjects.html",
         subjects=all_subjects
     )
 
@@ -94,7 +94,7 @@ def add_student():
     subjects = Subject.query.all()
 
     return render_template(
-        "add_student.html",
+        "teacher/add_student.html",
         subjects=subjects
     )
 
@@ -117,7 +117,7 @@ def students():
         students = Student.query.all()
 
     return render_template(
-        "students.html",
+        "teacher/students.html",
         students=students,
         search=search
     )
@@ -213,7 +213,7 @@ def create_class():
     subjects = Subject.query.all()
 
     return render_template(
-        "create_class.html",
+        "teahcer/create_class.html",
         subjects=subjects
     )
 
@@ -258,7 +258,7 @@ def attendance(class_id):
         return redirect(url_for("teacher.dashboard"))
 
     return render_template(
-        "take_attendance.html",
+        "teacher/take_attendance.html",
         students=students,
         class_data=class_data
     )
