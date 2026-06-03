@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emergency</title>
+</head>
+<body>
+
+<h2>Emergency Panel</h2>
+
+<h3>Medical Attendance</h3>
+
+<table border="1" cellpadding="10">
+
+    <tr>
+        <th>Student ID</th>
+        <th>Name</th>
+        <th>Action</th>
+    </tr>
+
+    {% for student in students %}
+
+    <tr>
+
+        <td>{{ student.student_code }}</td>
+
+        <td>{{ student.name }}</td>
+
+        <td>
+
+            <a href="{{ url_for('emergency.medical_attendance', student_id=student.id) }}">
+                Open
+            </a>
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+<br><br>
+
+<a href="{{ url_for('emergency.change_class') }}">
+    Change Class Timings
+</a>
+
+<br><br>
+
+<a href="{{ url_for('teacher.dashboard') }}">
+    Back
+</a>
+
+</body>
+</html>
