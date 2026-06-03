@@ -72,8 +72,9 @@ def add_student():
         selected_subjects = request.form.getlist("subjects")
 
         student = Student(
-            name=name,
-            student_code=student_code
+            username=student_code,
+            password=generate_password_hash(student_code),
+            role="student"
         )
 
         db.session.add(student)
