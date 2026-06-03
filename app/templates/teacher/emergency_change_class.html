@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emergency Class Change</title>
+</head>
+<body>
+
+<h2>Emergency Class Time Change</h2>
+
+<form method="POST">
+
+    <label>Select Class</label><br>
+
+    <select name="class_id" required>
+
+        <option value="">Select Class</option>
+
+        {% for cls in classes %}
+
+        <option value="{{ cls.id }}">
+
+            {{ cls.class_name }}
+            -
+            {{ cls.class_date }}
+            -
+            {{ cls.start_time }}
+            to
+            {{ cls.end_time }}
+
+        </option>
+
+        {% endfor %}
+
+    </select>
+
+    <br><br>
+
+    <label>New Date</label><br>
+
+    <input
+        type="date"
+        name="class_date"
+        required
+    >
+
+    <br><br>
+
+    <label>New Start Time</label><br>
+
+    <input
+        type="time"
+        name="start_time"
+        required
+    >
+
+    <br><br>
+
+    <label>New End Time</label><br>
+
+    <input
+        type="time"
+        name="end_time"
+        required
+    >
+
+    <br><br>
+
+    <button type="submit">
+        Update Class Timing
+    </button>
+
+</form>
+
+<br>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+
+    {% endif %}
+{% endwith %}
+
+<br>
+
+<a href="{{ url_for('emergency.emergency_home') }}">
+    Back
+</a>
+
+</body>
+</html>
