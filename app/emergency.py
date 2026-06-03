@@ -22,7 +22,7 @@ def emergency_home():
     students = Student.query.all()
 
     return render_template(
-        "emergency.html",
+        "teacher/emergency.html",
         students=students
     )
 
@@ -78,7 +78,7 @@ def medical_attendance(student_id):
         )
 
     return render_template(
-        "medical_attendance.html",
+        "teacher/medical_attendance.html",
         student=student,
         attendance_records=attendance_records
     )
@@ -129,6 +129,6 @@ def change_class():
         )
 
     return render_template(
-        "emergency_change_class.html",
+        "teacher/emergency_change_class.html",
         classes=classes
     )
