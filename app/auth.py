@@ -20,7 +20,7 @@ def login():
         
         if user and check_password_hash(user.password, password):
             login_user(user)
-            return redirect("/teacher" if user.role == "teacher" else "/student")
+            return redirect("/teacher/dashboard" if user.role == "teacher" else "/student/dashboard")
         else:
             flash("Invalid username or password. Please try again.", "error")
             return render_template("login.html")
