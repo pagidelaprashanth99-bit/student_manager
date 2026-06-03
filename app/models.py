@@ -20,8 +20,20 @@ def load_user(user_id):
 
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    student_code = db.Column(db.String(50), unique=True, nullable=True)
     name = db.Column(db.String(100))
     user_id = db.Column(db.Integer)
+
+class Subject(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=india_now)
+
+class StudentSubject(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey("student.id"))
+    subject_id = db.Column(db.Integer, db.ForeignKey("subject.id"))
+    created_at = db.Column(db.DateTime, default=india_now)
 
 class ClassSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -30,6 +42,7 @@ class ClassSession(db.Model):
 class ClassSchedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     class_name = db.Column(db.String(100))
+    subject_id = db.Column(db.Integer, db.ForeignKey("subject.id"), nullable=True)
     class_date = db.Column(db.Date)
     start_time = db.Column(db.Time)
     end_time = db.Column(db.Time)
@@ -48,6 +61,8 @@ class Attendance(db.Model):
     class_schedule_id = db.Column(db.Integer, db.ForeignKey("class_schedule.id"))
     status = db.Column(db.Boolean)
     marked_at = db.Column(db.DateTime, default=india_now)
+    medical_report_path = db.Column(db.String(300), nullable=True)
+    updated_by_emergency = db.Column(db.Boolean, default=False)
 
 class AttendancePercentageOverride(db.Model):
     id = db.Column(db.Integer, primary_key=True)
