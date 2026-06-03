@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Medical Attendance</title>
+</head>
+<body>
+
+<h2>Medical Attendance</h2>
+
+<h3>{{ student.name }}</h3>
+
+<table border="1" cellpadding="10">
+
+    <tr>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Medical Update</th>
+    </tr>
+
+    {% for attendance in attendance_records %}
+
+    <tr>
+
+        <td>
+            {{ attendance.marked_at.date() }}
+        </td>
+
+        <td>
+
+            {% if attendance.status %}
+                Present
+            {% else %}
+                Absent
+            {% endif %}
+
+        </td>
+
+        <td>
+
+            {% if not attendance.status %}
+
+            <form
+                method="POST"
+                enctype="multipart/form-data"
+            >
+
+                <input
+                    type="hidden"
+                    name="attendance_id"
+                    value="{{ attendance.id }}"
+                >
+
+                <input
+                    type="file"
+                    name="medical_report"
+                    required
+                >
+
+                <button type="submit">
+                    Approve Medical
+                </button>
+
+            </form>
+
+            {% else %}
+
+                Already Present
+
+            {% endif %}
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+<br>
+
+<a href="{{ url_for('emergency.emergency_home') }}">
+    Back
+</a>
+
+</body>
+</html>
