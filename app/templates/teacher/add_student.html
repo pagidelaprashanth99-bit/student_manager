@@ -1,30 +1,36 @@
-{% extends "base.html" %}
-
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Student</title>
+</head>
+<body>
 
 <h2>Add Student</h2>
 
-<a href="{{ url_for('teacher.students') }}">Back</a>
-
-<br><br>
-
 <form method="POST">
-    <label>Student Name</label>
-    <input type="text" name="name" required>
 
-    <br><br>
+    <label>Student ID</label><br>
+    <input type="text" name="student_code" required><br><br>
 
-    <label>Username</label>
-    <input type="text" name="username" required>
+    <label>Student Name</label><br>
+    <input type="text" name="name" required><br><br>
 
-    <br><br>
+    <label>Select Subjects</label><br>
 
-    <label>Password</label>
-    <input type="password" name="password" required>
+    {% for subject in subjects %}
+        <input type="checkbox" name="subjects" value="{{ subject.id }}">
+        {{ subject.name }} <br>
+    {% endfor %}
 
-    <br><br>
+    <br>
 
-    <button type="submit">Add Student</button>
+    <button type="submit">Create Student</button>
+
 </form>
 
-{% endblock %}
+<br>
+
+<a href="{{ url_for('teacher.dashboard') }}">Back</a>
+
+</body>
+</html>
