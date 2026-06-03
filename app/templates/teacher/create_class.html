@@ -1,48 +1,46 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Class</title>
+</head>
+<body>
 
-{% block content %}
-
-<h2>Create Class / Subject</h2>
+<h2>Create Class</h2>
 
 <form method="POST">
 
-    <label>Subject / Class Name</label>
-    <input type="text" name="class_name" required>
+    <label>Select Subject</label><br>
+
+    <select name="subject_id" required>
+
+        <option value="">Select</option>
+
+        {% for subject in subjects %}
+
+        <option value="{{ subject.id }}">
+            {{ subject.name }}
+        </option>
+
+        {% endfor %}
+
+    </select>
 
     <br><br>
 
-    <label>Date</label>
+    <label>Class Date</label><br>
     <input type="date" name="class_date" required>
 
     <br><br>
 
-    <label>Start Time</label>
+    <label>Start Time</label><br>
     <input type="time" name="start_time" required>
 
     <br><br>
 
-    <label>End Time</label>
+    <label>End Time</label><br>
     <input type="time" name="end_time" required>
 
     <br><br>
-
-    <h3>Assign Students</h3>
-
-    {% for student in students %}
-
-        <label>
-            <input type="checkbox"
-                   name="students"
-                   value="{{ student.id }}">
-
-            {{ student.name }}
-        </label>
-
-        <br>
-
-    {% endfor %}
-
-    <br>
 
     <button type="submit">
         Create Class
@@ -50,4 +48,23 @@
 
 </form>
 
-{% endblock %}
+<br>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+
+    {% endif %}
+{% endwith %}
+
+<br>
+
+<a href="{{ url_for('teacher.dashboard') }}">
+    Back
+</a>
+
+</body>
+</html>
