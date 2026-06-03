@@ -1,39 +1,50 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Students</title>
+</head>
+<body>
 
-{% block content %}
+<h2>Students List</h2>
 
-<h2>Manage Students</h2>
+<form method="GET">
 
-<a href="{{ url_for('teacher.dashboard') }}">Back to Dashboard</a>
-<br><br>
+    <input
+        type="text"
+        name="search"
+        placeholder="Search Student"
+        value="{{ search }}"
+    >
 
-<a href="{{ url_for('teacher.add_student') }}">Add New Student</a>
+    <button type="submit">Search</button>
 
-<br><br>
+</form>
+
+<br>
 
 <table border="1" cellpadding="10">
+
     <tr>
-        <th>ID</th>
-        <th>Student Name</th>
-        <th>Actions</th>
+        <th>Student ID</th>
+        <th>Name</th>
     </tr>
 
     {% for student in students %}
+
     <tr>
-        <td>{{ student.id }}</td>
+        <td>{{ student.student_code }}</td>
         <td>{{ student.name }}</td>
-        <td>
-            <a href="{{ url_for('teacher.edit_student', student_id=student.id) }}">
-                Edit
-            </a>
-            |
-            <a href="{{ url_for('teacher.delete_student', student_id=student.id) }}"
-               onclick="return confirm('Are you sure you want to delete this student?')">
-                Delete
-            </a>
-        </td>
     </tr>
+
     {% endfor %}
+
 </table>
 
-{% endblock %}
+<br>
+
+<a href="{{ url_for('teacher.dashboard') }}">
+    Back
+</a>
+
+</body>
+</html>
