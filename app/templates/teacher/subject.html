@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Subjects</title>
+</head>
+<body>
+
+<h2>Create Subject</h2>
+
+<form method="POST">
+
+    <label>Subject Name</label><br>
+
+    <input
+        type="text"
+        name="name"
+        required
+    >
+
+    <br><br>
+
+    <button type="submit">
+        Add Subject
+    </button>
+
+</form>
+
+<br>
+
+<h2>Subjects List</h2>
+
+<table border="1" cellpadding="10">
+
+    <tr>
+        <th>ID</th>
+        <th>Subject</th>
+    </tr>
+
+    {% for subject in subjects %}
+
+    <tr>
+        <td>{{ subject.id }}</td>
+        <td>{{ subject.name }}</td>
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+<br>
+
+<a href="{{ url_for('teacher.dashboard') }}">
+    Back
+</a>
+
+</body>
+</html>
