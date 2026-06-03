@@ -27,12 +27,12 @@ def create_app():
 
     login_manager.login_view = "auth.login"
 
-    from app.auth import auth
+    from app.auth import auth_bp
     from app.teacher import teacher
     from app.student import student
     from app.emergency import emergency
 
-    app.register_blueprint(auth)
+    app.register_blueprint(auth_bp)
     app.register_blueprint(teacher)
     app.register_blueprint(student)
     app.register_blueprint(emergency)
