@@ -1,31 +1,91 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard</title>
+</head>
+<body>
 
-{% block content %}
-<div class="dashboard-container">
-    <h2>Student Dashboard</h2>
+<h2>Student Dashboard</h2>
 
-    <h3>Your Subject-wise Attendance</h3>
+{% if student %}
 
-    {% if result %}
-    <table class="attendance-table">
-        <tr>
-            <th>Subject</th>
-            <th>Attended Classes</th>
-            <th>Total Classes</th>
-            <th>Percentage</th>
-        </tr>
+<p>
+    <b>Student ID:</b>
+    {{ student.student_code }}
+</p>
 
-        {% for item in result %}
-        <tr>
-            <td>{{ item.subject }}</td>
-            <td>{{ item.attended }}</td>
-            <td>{{ item.total }}</td>
-            <td>{{ item.percentage }}%</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-        <p>No attendance records available.</p>
-    {% endif %}
-</div>
-{% endblock %}
+<p>
+    <b>Name:</b>
+    {{ student.name }}
+</p>
+
+{% endif %}
+
+<hr>
+
+<h2>Upcoming Classes</h2>
+
+<table border="1" cellpadding="10">
+
+    <tr>
+        <th>Subject</th>
+        <th>Date</th>
+        <th>Start</th>
+        <th>End</th>
+    </tr>
+
+    {% for cls in classes %}
+
+    <tr>
+
+        <td>{{ cls.class_name }}</td>
+
+        <td>{{ cls.class_date }}</td>
+
+        <td>{{ cls.start_time }}</td>
+
+        <td>{{ cls.end_time }}</td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+<br>
+
+<h2>Attendance</h2>
+
+<table border="1" cellpadding="10">
+
+    <tr>
+        <th>Date</th>
+        <th>Status</th>
+    </tr>
+
+    {% for attendance in attendance_records %}
+
+    <tr>
+
+        <td>
+            {{ attendance.marked_at.date() }}
+        </td>
+
+        <td>
+
+            {% if attendance.status %}
+                Present
+            {% else %}
+                Absent
+            {% endif %}
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+</body>
+</html>
