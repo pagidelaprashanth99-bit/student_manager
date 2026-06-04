@@ -69,24 +69,44 @@ def add_student():
 
         name = request.form.get("name")
         student_code = request.form.get("student_code")
+        username = request.form.get("username")
+        password = request.form.get("password")
         selected_subjects = request.form.getlist("subjects")
 
-        student = Student(
-            username=student_code,
-            password=generate_password_hash(student_code),
+        existing_user = User.query.filter_by(username=username).first()
+        existing_student = Student.query.filter_by(student_code=student_code).first()
+
+        if existing_user:
+            flash("Username already exists")
+            return redirect(url_for("teacher.add_student"))
+
+        if existing_student:
+            flash("Student ID already exists")
+            return redirect(url_for("teacher.add_student"))
+
+        user = User(
+            username=username,
+            password=generate_password_hash(password),
             role="student"
+        )
+
+        db.session.add(user)
+        db.session.commit()
+
+        student = Student(
+            student_code=student_code,
+            name=name,
+            user_id=user.id
         )
 
         db.session.add(student)
         db.session.commit()
 
         for subject_id in selected_subjects:
-
             ss = StudentSubject(
                 student_id=student.id,
                 subject_id=subject_id
             )
-
             db.session.add(ss)
 
         db.session.commit()
@@ -100,7 +120,6 @@ def add_student():
         "teacher/add_student.html",
         subjects=subjects
     )
-
 # =========================
 # STUDENT SEARCH
 # =========================
