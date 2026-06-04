@@ -20,9 +20,11 @@ def load_user(user_id):
 
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    student_code = db.Column(db.String(50), unique=True, nullable=True)
-    name = db.Column(db.String(100))
-    user_id = db.Column(db.Integer)
+    student_code = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+    user = db.relationship("User", backref="student_profile")
 
 class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
