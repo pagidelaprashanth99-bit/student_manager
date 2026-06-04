@@ -16,8 +16,13 @@
     <label>Student Name</label><br>
     <input type="text" name="name" required><br><br>
 
-    <label>Select Subjects</label><br>
+    <label>Login Username</label><br>
+    <input type="text" name="username" required><br><br>
 
+    <label>Login Password</label><br>
+    <input type="text" name="password" required><br><br>
+
+    <label>Select Subjects</label><br>
     {% for subject in subjects %}
         <input type="checkbox" name="subjects" value="{{ subject.id }}">
         {{ subject.name }} <br>
@@ -28,6 +33,16 @@
     <button type="submit">Create Student</button>
 
 </form>
+
+<br>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
 
 <br>
 
